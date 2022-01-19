@@ -569,6 +569,9 @@ class SP extends \SimpleSAML\Auth\Source
                 )
             )
         );
+        if (isset($state['IDPList'])) {
+            $ar->setIDPList($state['IDPList']);
+        }
 
         $ar->setRequesterID($requesterID);
 
