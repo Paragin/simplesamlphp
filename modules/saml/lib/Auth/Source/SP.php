@@ -528,13 +528,16 @@ class SP extends \SimpleSAML\Auth\Source
             }
         }
 
-        $IDPList = [];
         $requesterID = [];
 
         /* Only check for real info for Scoping element if we are going to send Scoping element */
         if ($this->disable_scoping !== true && $idpMetadata->getBoolean('disable_scoping', false) !== true) {
-            if (isset($state['saml:IDPList'])) {
-                $IDPList = $state['saml:IDPList'];
+            if (isset($state['IDPList'])) {
+                $ar->setIDPList($state['IDPList']);
+            } elseif ($this->metadata->getArray('IDPList', []) !== null) {
+                $ar->setIDPList($this->metadata->getArray('IDPList', []));
+            } elseif ($idpMetadata->getArray('IDPList', [])) {
+                $ar->setIDPList($idpMetadata->getArray('IDPList', []));
             }
 
             if (isset($state['saml:ProxyCount']) && $state['saml:ProxyCount'] !== null) {
@@ -555,19 +558,6 @@ class SP extends \SimpleSAML\Auth\Source
             }
         } else {
             Logger::debug('Disabling samlp:Scoping for ' . var_export($idpMetadata->getString('entityid'), true));
-        }
-
-        $ar->setIDPList(
-            array_unique(
-                array_merge(
-                    $this->metadata->getArray('IDPList', []),
-                    $idpMetadata->getArray('IDPList', []),
-                    (array) $IDPList
-                )
-            )
-        );
-        if (isset($state['IDPList'])) {
-            $ar->setIDPList($state['IDPList']);
         }
 
         $ar->setRequesterID($requesterID);
